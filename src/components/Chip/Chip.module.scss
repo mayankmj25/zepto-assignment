@@ -1,0 +1,27 @@
+.chip {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  margin: 4px;
+  background-color: #e0e0e0;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.label {
+  margin-right: 8px;
+}
+
+.removeButton {
+  cursor: pointer;
+  background: none;
+  border: none;
+  color: #606060;
+  font-size: 16px;
+}
+
+
+.highlighted {
+  border: 2px solid blue; 
+}

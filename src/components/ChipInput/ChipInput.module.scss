@@ -1,0 +1,40 @@
+  .chipInput {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.chipContainer {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.input {
+  padding: 8px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.suggestions {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  z-index: 1000;
+  background-color: #fff;
+  width: 100%;
+  border: 1px solid #ccc;
+  border-top: none;
+  max-height: 200px;
+  overflow-y: auto;
+
+  li {
+    padding: 8px;
+    cursor: pointer;
+    &:hover {
+      background-color: #f2f2f2;
+    }
+  }
+}
