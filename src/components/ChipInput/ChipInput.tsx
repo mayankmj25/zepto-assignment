@@ -7,50 +7,46 @@ interface ChipInputProps {
 }
 
 interface User {
-    id: number;
-    name: string;
-    email: string;
-  }
+  id: number;
+  name: string;
+  email: string;
+}
 
 const ChipInput: React.FC<ChipInputProps> = ({ users }) => {
   const [inputValue, setInputValue] = useState("");
   const [filteredUsers, setFilteredUsers] = useState<User[]>(users);
   const [selectedChips, setSelectedChips] = useState<User[]>([]);
   const [isLastChipHighlighted, setIsLastChipHighlighted] = useState(false);
-
+  const [isInputFocused, setIsInputFocused] = useState(false);
 
   useEffect(() => {
     // Filter users based on input value and exclude selected users
     const filter = inputValue.toLowerCase();
-    const filtered = users.filter(user => 
-      user.name.toLowerCase().includes(filter) && 
-      !selectedChips.find(chip => chip.id === user.id)
+    const filtered = users.filter(
+      (user) =>
+        user.name.toLowerCase().includes(filter) &&
+        !selectedChips.find((chip) => chip.id === user.id)
     );
     setFilteredUsers(filtered);
   }, [inputValue, users, selectedChips]);
-
-    
 
   const handleSelectUser = (user: User) => {
     // Add user to selectedChips
     setSelectedChips((chips) => [...chips, user]);
     // Reset input value
-    setInputValue('');
+    setInputValue("");
   };
-  
 
   const handleRemoveChip = (userId: number) => {
     // Remove chip from selectedChips
-    setSelectedChips((chips) => chips.filter((chip) => chip
-  .id !== userId));
-  // The user will be added back to the suggestions list via the useEffect
-  // as the filteredUsers state depends on both selectedChips and inputValue.
+    setSelectedChips((chips) => chips.filter((chip) => chip.id !== userId));
+    // The user will be added back to the suggestions list via the useEffect
+    // as the filteredUsers state depends on both selectedChips and inputValue.
   };
-  
-  
-  // Logic to handle backspace key press 
+
+  // Logic to handle backspace key press
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Backspace' && inputValue === '') {
+    if (e.key === "Backspace" && inputValue === "") {
       if (isLastChipHighlighted) {
         // If the last chip is already highlighted, remove it
         const lastChip = selectedChips[selectedChips.length - 1];
@@ -63,11 +59,19 @@ const ChipInput: React.FC<ChipInputProps> = ({ users }) => {
         setIsLastChipHighlighted(true);
       }
     } else {
-        //if any other key is pressed
+      //if any other key is pressed
       setIsLastChipHighlighted(false);
     }
   };
 
+  const handleInputFocus = () => {
+    setIsInputFocused(true);
+  };
+
+  const handleInputBlur = () => {
+    // Use a timeout to delay hiding the suggestions to allow for selection
+    setTimeout(() => setIsInputFocused(false), 200);
+  };
 
   return (
     <div className={styles.chipInput}>
@@ -77,7 +81,11 @@ const ChipInput: React.FC<ChipInputProps> = ({ users }) => {
             key={user.id}
             label={user.name}
             onRemove={() => handleRemoveChip(user.id)}
-            isHighlighted={isLastChipHighlighted && index === selectedChips.length - 1 ? true : false}
+            isHighlighted={
+              isLastChipHighlighted && index === selectedChips.length - 1
+                ? true
+                : false
+            }
           />
         ))}
       </div>
@@ -87,9 +95,11 @@ const ChipInput: React.FC<ChipInputProps> = ({ users }) => {
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
         onKeyDown={handleKeyDown}
+        onFocus={handleInputFocus}
+        onBlur={handleInputBlur}
         placeholder="Start typing..."
       />
-      {inputValue && (
+      {isInputFocused && (
         <ul className={styles.suggestions}>
           {filteredUsers.map((user) => (
             <li key={user.id} onClick={() => handleSelectUser(user)}>
