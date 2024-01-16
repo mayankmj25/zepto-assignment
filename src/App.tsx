@@ -1,38 +1,26 @@
-import React, { useState } from "react";
-import Chip from "./components/Chip/Chip";
+import React from "react";
 import ChipInput from './components/ChipInput/ChipInput';
 import userData from './data/user.json'; 
+import { User } from './types';
 import "./App.scss";
 
-interface User {
-  id: number;
-  name: string;
-  email: string;
-}
+// as it might slow the app by little
+// Validate or transform userData to ensure it matches the User[] type
+// const validatedUserData: User[] = userData.map(user => ({
+//   id: user.id,
+//   name: user.name,
+//   email: user.email,
+// }));
 
-// const users: User[] = userData;
 
-
-
-const App: React.FC = () => {
-  // const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
-
-  // const handleRemoveUser = (userId: number) => {
-  //   setSelectedUsers(selectedUsers.filter((user) => user.id !== userId));
-  // };
+const App: React.FC = () : JSX.Element => {
 
   return (
     <div className="app">
-      {/* <div className="chip-container">
-        {selectedUsers.map((user) => (
-          <Chip
-            key={user.id}
-            label={user.name}
-            onRemove={() => handleRemoveUser(user.id)}
-          />
-        ))}
-      </div> */}
-      <ChipInput users={userData} />
+      <div>
+      <h1 className="title">Pick Users</h1>
+      </div>
+      <ChipInput users={userData as User[]} />
     </div>
   );
 };

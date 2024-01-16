@@ -1,40 +1,60 @@
-  .chipInput {
+.chipInputWrapper {
   display: flex;
-  flex-direction: row;
-  position: relative;
+  flex-direction: column;
+  border-bottom: 2px solid purple;
+  padding: 5px;
+  background-color: #fff;
+  width: 70%;
 }
 
 .chipContainer {
   display: flex;
   flex-wrap: wrap;
-  margin-bottom: 8px;
+  align-items: center;
+  padding: 2px;
+}
+
+.inputContainer {
+  display: flex;
+  flex-direction: column;
+  position: relative;
 }
 
 .input {
-  padding: 8px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  flex-grow: 1;
+  border: none;
+  outline: none;
+  padding: 8px 8px;
+  font-size: 14px;
+  background: transparent;
 }
 
 .suggestions {
-  list-style: none;
-  margin: 0;
-  padding: 0;
   position: absolute;
-  z-index: 1000;
-  background-color: #fff;
-  width: 100%;
-  border: 1px solid #ccc;
-  border-top: none;
-  max-height: 200px;
+  top: 100%;
+  border: none;
+  margin-top: 12px;
+  width: 360px;
+  max-height: 500px;
   overflow-y: auto;
+  overflow-x: hidden;
+}
 
-  li {
-    padding: 8px;
-    cursor: pointer;
-    &:hover {
-      background-color: #f2f2f2;
-    }
+.listItem {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 8px 16px;
+  cursor: pointer;
+  &:hover {
+    background-color: #f7f7f7;
   }
+}
+
+.name {
+  padding-right: 4px;
+}
+
+.email {
+  padding-right: 4px;
 }

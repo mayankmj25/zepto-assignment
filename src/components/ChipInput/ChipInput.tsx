@@ -1,26 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Chip from "../Chip/Chip";
 import styles from "./ChipInput.module.scss";
+import { User, ChipInputProps } from "../../types";
 
-interface ChipInputProps {
-  users: User[];
-}
-
-interface User {
-  id: number;
-  name: string;
-  email: string;
-}
-
-const ChipInput: React.FC<ChipInputProps> = ({ users }) => {
-  const [inputValue, setInputValue] = useState("");
+const ChipInput: React.FC<ChipInputProps> = ({ users }): JSX.Element => {
+  const [inputValue, setInputValue] = useState<string>("");
   const [filteredUsers, setFilteredUsers] = useState<User[]>(users);
   const [selectedChips, setSelectedChips] = useState<User[]>([]);
-  const [isLastChipHighlighted, setIsLastChipHighlighted] = useState(false);
-  const [isInputFocused, setIsInputFocused] = useState(false);
+  const [isLastChipHighlighted, setIsLastChipHighlighted] =
+    useState<boolean>(false);
+  const [isInputFocused, setIsInputFocused] = useState<boolean>(false);
 
   useEffect(() => {
-    // Filter users based on input value and exclude selected users
     const filter = inputValue.toLowerCase();
     const filtered = users.filter(
       (user) =>
@@ -30,51 +21,58 @@ const ChipInput: React.FC<ChipInputProps> = ({ users }) => {
     setFilteredUsers(filtered);
   }, [inputValue, users, selectedChips]);
 
-  const handleSelectUser = (user: User) => {
-    // Add user to selectedChips
+  const handleSelectUser = useCallback((user: User) => {
     setSelectedChips((chips) => [...chips, user]);
-    // Reset input value
     setInputValue("");
-  };
+    //assumption that last chip should not be highlighted if new one is added after backpress
+    setIsLastChipHighlighted(false);
+  }, []);
 
-  const handleRemoveChip = (userId: number) => {
-    // Remove chip from selectedChips
+  const handleRemoveChip = useCallback((userId: number) => {
     setSelectedChips((chips) => chips.filter((chip) => chip.id !== userId));
-    // The user will be added back to the suggestions list via the useEffect
-    // as the filteredUsers state depends on both selectedChips and inputValue.
-  };
+  }, []);
 
   // Logic to handle backspace key press
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Backspace" && inputValue === "") {
-      if (isLastChipHighlighted) {
-        // If the last chip is already highlighted, remove it
-        const lastChip = selectedChips[selectedChips.length - 1];
-        if (lastChip) {
-          handleRemoveChip(lastChip.id);
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Backspace" && inputValue === "") {
+        if (isLastChipHighlighted) {
+          const lastChip = selectedChips[selectedChips.length - 1];
+          if (lastChip) {
+            handleRemoveChip(lastChip.id);
+          }
+          setIsLastChipHighlighted(false);
+        } else if (selectedChips.length > 0) {
+          setIsLastChipHighlighted(true);
         }
+      } else {
         setIsLastChipHighlighted(false);
-      } else if (selectedChips.length > 0) {
-        // Highlight the last chip
-        setIsLastChipHighlighted(true);
       }
-    } else {
-      //if any other key is pressed
-      setIsLastChipHighlighted(false);
-    }
-  };
+    },
+    [handleRemoveChip, inputValue, isLastChipHighlighted, selectedChips]
+  );
 
-  const handleInputFocus = () => {
+  const handleInputFocus = useCallback(() => {
     setIsInputFocused(true);
-  };
+  }, []);
 
-  const handleInputBlur = () => {
-    // Use a timeout to delay hiding the suggestions to allow for selection
-    setTimeout(() => setIsInputFocused(false), 200);
-  };
+  const handleInputBlur = useCallback(
+    (event: React.FocusEvent<HTMLInputElement>) => {
+      // Use a timeout to delay hiding the suggestions to allow for selection
+      const currentTarget = event.currentTarget;
+
+      setTimeout(() => {
+        // Check if the new active element is not within the suggestions box
+        if (!currentTarget.contains(document.activeElement)) {
+          setIsInputFocused(false);
+        }
+      }, 0);
+    },
+    []
+  );
 
   return (
-    <div className={styles.chipInput}>
+    <div className={styles.chipInputWrapper}>
       <div className={styles.chipContainer}>
         {selectedChips.map((user, index) => (
           <Chip
@@ -83,31 +81,37 @@ const ChipInput: React.FC<ChipInputProps> = ({ users }) => {
             onRemove={() => handleRemoveChip(user.id)}
             isHighlighted={
               isLastChipHighlighted && index === selectedChips.length - 1
-                ? true
-                : false
             }
           />
         ))}
+        <div className={styles.inputContainer}>
+          <input
+            type="text"
+            className={styles.input}
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onFocus={handleInputFocus}
+            onBlur={handleInputBlur}
+            placeholder="Add New User"
+          />
+          {isInputFocused && (
+            <div className={styles.suggestions}>
+              {filteredUsers.map((user) => (
+                <div
+                  className={styles.listItem}
+                  key={user.id}
+                  onClick={() => handleSelectUser(user)}
+                  onMouseDown={(e) => e.preventDefault()} // Prevent the blur event when mousedown occurs
+                >
+                  <div className={styles.name}>{user.name}</div>
+                  <div className={styles.email}>{user.email}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-      <input
-        type="text"
-        className={styles.input}
-        value={inputValue}
-        onChange={(e) => setInputValue(e.target.value)}
-        onKeyDown={handleKeyDown}
-        onFocus={handleInputFocus}
-        onBlur={handleInputBlur}
-        placeholder="Start typing..."
-      />
-      {isInputFocused && (
-        <ul className={styles.suggestions}>
-          {filteredUsers.map((user) => (
-            <li key={user.id} onClick={() => handleSelectUser(user)}>
-              {user.name} ({user.email})
-            </li>
-          ))}
-        </ul>
-      )}
     </div>
   );
 };
